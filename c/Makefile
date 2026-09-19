@@ -20,14 +20,16 @@ hello: hello.o dbllist.o
 hello.o: hello.c $(DEPS)
 	$(CC) -c $^ $(CFLAGS)
 
-dbllist.o: $(DEPS)
+dbllist.o: $(DEPS) dbllist.c
 	$(CC) -c $^ $(CFLAGS)
 
-test: munit.o $(DEPS) $(TESTS)
+test: munit.o dbllist.o $(TESTS)
 	$(CC) -o $@ $^ $(CFLAGS)
-	./test
 
-munit: $(TESTDEPS)
+run-test: test
+	./test --log-visible info --show-stderr
+
+munit.o: $(TESTDEPS)
 	$(CC) -c $^ -g
 
 .PHONY: clean

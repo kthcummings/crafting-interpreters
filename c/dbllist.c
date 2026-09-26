@@ -61,8 +61,21 @@ List* createEmptyList(){
     return newList;
 }
 
+void deleteList(List* list){
+    if(list->length>0){
+        Node* node = list->head;
+        for(int i = 0; i<list->length; i++){
+            Node* next = node->next;
+            free(node->data);
+            free(node);
+            node = next;
+        }
+    }
+    free(list);
+}
+
 Node* getItem(List* list, int pos){
-    if(pos >= list->length){
+    if(pos >= list->length || pos < 0){
         return NULL;
     }
     else if(pos == 0){
@@ -73,14 +86,32 @@ Node* getItem(List* list, int pos){
     }
     // traverse
     Node* node = list->head;
-    Node* prev;
     for(int i = 0; i<list->length; ++i){
-        prev = node;
         if(i == pos){
             return node;
         }
         node = node->next;
     }
+    return NULL;
+}
+
+// Note: This only finds the first item that matches
+Node* findItem(List* list, const char* data, int* pos){
+    Node* node = list-> head;
+    for(int i = 0; i<(list->length+1); i++){
+        if(strcmp(data, node->data) == 0){
+            *pos = i;
+            return node;
+        }
+        else{
+            if(node->next)
+            {
+                node = node->next;
+            }
+        }
+    }
+    *pos = -1;
+    return NULL;
 }
 
 Node* insertItem(List* list, const char* data, int pos){

@@ -31,17 +31,60 @@ void printFullList(const List* list){
 
 MunitResult getTest(const MunitParameter params[], void* fixture) {
     List* list = createListWithSep("0,1,2,3,4",",");
+
     Node* node = getItem(list, 0);
+    munit_assert_not_null(node);
     munit_assert_string_equal(node->data,"0");
-    node = getItem(list,2);
-    munit_assert_string_equal(node->data,"2");
+    munit_log(MUNIT_LOG_INFO, "Found head");
+
     node = getItem(list,4);
+    munit_assert_not_null(node);
     munit_assert_string_equal(node->data,"4");
+    munit_log(MUNIT_LOG_INFO, "Found tail");
+
+    node = getItem(list,2);
+    munit_assert_not_null(node);
+    munit_assert_string_equal(node->data,"2");
+    munit_log(MUNIT_LOG_INFO, "Found middle");
+
+    node = getItem(list,10);
+    munit_assert_null(node);
+    node = getItem(list, -2);
+    munit_assert_null(node);
+    munit_log(MUNIT_LOG_INFO, "Looked for nonexistent data");
+
+    deleteList(list);
     return MUNIT_OK;
 }
 
 MunitResult findTest(const MunitParameter params[], void* fixture) {
-    return MUNIT_FAIL;
+    List* list = createListWithSep("0,1,2,3,4",",");
+    int pos = -1;
+    Node* node = findItem(list, "0", &pos);
+    munit_assert_not_null(node);
+    munit_log(MUNIT_LOG_INFO, "Found head");
+    munit_assert_string_equal(node->data, "0");
+    munit_assert_int(pos, ==, 0);
+
+    node = findItem(list,"4",&pos);
+    munit_assert_not_null(node);
+    munit_log(MUNIT_LOG_INFO, "Found tail");
+    munit_assert_string_equal(node->data, "4");
+    munit_assert_int(pos, ==, 4);
+
+    node = findItem(list,"2",&pos);
+    munit_assert_not_null(node);
+    munit_log(MUNIT_LOG_INFO, "Found middle");
+    munit_assert_string_equal(node->data, "2");
+    munit_assert_int(pos, ==, 2);
+
+    node = findItem(list,"wahhh",&pos);
+    munit_log(MUNIT_LOG_INFO, "Looked for nonexistent data");
+    munit_assert_null(node);
+    munit_assert_int(pos, ==, -1);
+
+    deleteList(list);
+    return MUNIT_OK;
 }
 
 static void* appendSetup(const MunitParameter params[], void* user_data){
@@ -61,16 +104,7 @@ static void* appendSetup(const MunitParameter params[], void* user_data){
 
 static void appendTeardown(void* fixture) {
     List* list = (List*)fixture;
-    if(list->length>0){
-        Node* node = list->head;
-        for(int i = 0; i<list->length; i++){
-            Node* next = node->next;
-            free(node->data);
-            free(node);
-            node = next;
-        }
-    }
-    free(list);
+    deleteList(list);
 }
 
 MunitResult appendTest(const MunitParameter params[], void* fixture) {
@@ -99,6 +133,14 @@ int main(int argc, char* argv[]){
     {
         "/get",
         getTest,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
+    {
+        "/find",
+        findTest,
         NULL,
         NULL,
         MUNIT_TEST_OPTION_NONE,

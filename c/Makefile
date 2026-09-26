@@ -26,8 +26,11 @@ dbllist.o: $(DEPS) dbllist.c
 test: munit.o dbllist.o $(TESTS)
 	$(CC) -o $@ $^ $(CFLAGS)
 
-run-test: test
+test-logs: test
 	./test --log-visible info --show-stderr
+
+run-test: test
+	./test
 
 munit.o: $(TESTDEPS)
 	$(CC) -c $^ -g

@@ -20,9 +20,12 @@ List* createList(const char* data);
 List* createListWithSep(const char* data, char* sep);
 List* createEmptyList();
 
+void deleteList(List* list);
+
 Node* findItem(List* list, const char* data, int* pos);
 Node* getItem(List* list, int pos);
 Node* insertItem(List* list, const char* data, int pos);
 Node* appendItem(List* list, const char* data);
 
 #endif
+

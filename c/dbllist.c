@@ -114,8 +114,9 @@ Node* findItem(List* list, const char* data, int* pos){
     return NULL;
 }
 
-Node* insertItem(List* list, const char* data, int pos){
-    Node* newNode;
+// Note: this shifts down the node previously at this position
+Node* insertItemAt(List* list, const char* data, int pos){
+    Node* newNode = NULL;
     if(pos > list->length){
         return NULL; // out of bounds insert
     }
@@ -127,16 +128,68 @@ Node* insertItem(List* list, const char* data, int pos){
         list->head = newNode;
     }
     else if(pos == list->length){
-        // new tail
+        // new tail via append
         newNode->prev = list->tail;
         list->tail->next = newNode;
         list->tail = newNode;
     }
     else{
         // middle insert
-
+        Node* existing = getItem(list, pos);
+        Node* prev = existing->prev;
+        newNode->next = existing;
+        newNode->prev = prev;
+        existing->prev = newNode;
+        prev->next = newNode;
     }
 
+    list->length++;
+    return newNode;
+}
+
+Node* insertItemBefore(List* list, const char* data, Node* node){
+    Node* newNode = createNode(data);
+    newNode->next = node;
+    if(node == list->head){
+        node->prev = newNode;
+        list->head = newNode;
+    }
+    else{
+        Node* prevNode = node->prev;
+        prevNode->next = newNode;
+        newNode->prev = prevNode;
+        node->prev = newNode;
+    }
+
+    list->length++;
+    return newNode;
+}
+
+Node* insertItemAfter(List* list, const char* data, Node* node){
+    if(node == list->tail){
+        return appendItem(list,data);
+    }
+    else{
+        Node* newNode = createNode(data);
+        newNode->prev = node;
+
+        Node* nextNode = node->next;
+        nextNode->prev = newNode;
+        newNode->next = nextNode;
+        node->next = newNode;
+
+        list->length++;
+        return newNode;
+    }   
+}
+
+Node* appendItem(List* list, const char* data){
+    Node* newNode = createNode(data);
+    Node* oldTail = list->tail;
+
+    newNode->prev = oldTail;
+    oldTail->next = newNode;
+    list->tail = newNode;
     list->length++;
     return newNode;
 }

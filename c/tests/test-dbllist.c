@@ -11,11 +11,11 @@
 #define RESET   "\x1b[0m"
 
 void printNode(const Node* node){
-    munit_logf(MUNIT_LOG_INFO,"%sNode%s: %p\n\tData: %s\n\tPrev: %p\n\tNext: %p\n",BLUE, RESET, node,node->data,node->prev,node->next);
+    munit_logf(MUNIT_LOG_INFO,"\n%sNode%s: %p\n\tData: %s\n\tPrev: %p\n\tNext: %p\n",BLUE, RESET, node,node->data,node->prev,node->next);
 }
 
 void printList(const List* list){
-    munit_logf(MUNIT_LOG_INFO,"%sList%s: %p\n\tLength: %u\n\tHead: %p\n\tTail: %p\n", GREEN, RESET, list, list->length,list->head,list->tail);
+    munit_logf(MUNIT_LOG_INFO,"\n%sList%s: %p\n\tLength: %u\n\tHead: %p\n\tTail: %p\n", GREEN, RESET, list, list->length,list->head,list->tail);
 }
 
 void printFullList(const List* list){
@@ -87,47 +87,141 @@ MunitResult findTest(const MunitParameter params[], void* fixture) {
     return MUNIT_OK;
 }
 
-static void* appendSetup(const MunitParameter params[], void* user_data){
-    const char* unlist;
-    List* newList;
+MunitResult insertAtTest(const MunitParameter params[], void* fixture){
+    List* list = createListWithSep("0,1,2,3,4",",");
+    printFullList(list);
 
-    unlist = munit_parameters_get(params, "list");
-    if(strlen(unlist) > 0)
-    {
-        newList = createListWithSep(unlist,",");
-    }
-    else{
-        newList = createEmptyList();
-    }
-    return newList;
-}
+    munit_log(MUNIT_LOG_INFO, "Inserting new head...");
+    Node* oldHead = list->head;
+    Node* node = insertItemAt(list, "x", 0);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, list->head);
+    munit_assert_ptr_equal(node->next, oldHead);
+    munit_assert_ptr_equal(node, oldHead->prev);
+    munit_assert_int(list->length,==,6);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted head.");
+    printFullList(list);
 
-static void appendTeardown(void* fixture) {
-    List* list = (List*)fixture;
+    munit_log(MUNIT_LOG_INFO, "Inserting new tail...");
+    Node* oldTail = list->tail;
+    node = insertItemAt(list, "y", 6);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, list->tail);
+    munit_assert_ptr_equal(node->prev, oldTail);
+    munit_assert_ptr_equal(node, oldTail->next);
+    munit_assert_int(list->length,==,7);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted tail.");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting new pre-tail...");
+    Node* existing = getItem(list, 6);
+    Node* prev = existing->prev;
+    node = insertItemAt(list, "z", 6);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, prev->next);
+    munit_assert_ptr_equal(node, existing->prev);
+    munit_assert_ptr_equal(node->prev, prev);
+    munit_assert_ptr_equal(node->next, existing);
+    munit_assert_int(list->length,==,8);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted pre-tail.");
+    printFullList(list);
+
     deleteList(list);
+    return MUNIT_OK;
 }
 
-MunitResult appendTest(const MunitParameter params[], void* fixture) {
-    //const char* insertion = munit_parameters_get(params,"insertion");
+MunitResult insertBeforeTest(const MunitParameter params[], void* fixture){
+    List* list = createListWithSep("0,1,2,3,4",",");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting before head...");
+    Node* oldHead = list->head;
+    Node* node = insertItemBefore(list, "head", oldHead);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, list->head);
+    munit_assert_ptr_equal(node->next, oldHead);
+    munit_assert_ptr_equal(node, oldHead->prev);
+    munit_assert_int(list->length,==,6);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted before head.");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting before tail...");
+    Node* oldTail = list->tail;
+    Node* prev = oldTail->prev;
+    node = insertItemBefore(list, "pre-tail", oldTail);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(list->tail, oldTail);
+    munit_assert_ptr_equal(node, oldTail->prev);
+    munit_assert_ptr_equal(node->next, oldTail);
+    munit_assert_ptr_equal(node, prev->next);
+    munit_assert_ptr_equal(node->prev, prev);
+    munit_assert_int(list->length,==,7);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted before tail.");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting before a middle node...");
+    int pos = 0;
+    Node* two = findItem(list, "2", &pos);
+    prev = two->prev;
+    munit_assert_not_null(two);
+    node = insertItemBefore(list, "middle", two);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, two->prev);
+    munit_assert_ptr_equal(node->next, two);
+    munit_assert_ptr_equal(node, prev->next);
+    munit_assert_ptr_equal(node->prev, prev);
+    munit_assert_int(list->length,==,8);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted before a middle node.");
+    printFullList(list);
+    
+    deleteList(list);
+    return MUNIT_OK;
+}
+
+MunitResult insertAfterTest(const MunitParameter params[], void* fixture){
+    List* list = createListWithSep("0,1,2,3,4",",");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting after head...");
+    Node* head = list->head;
+    Node* oldNext = head->next;
+    Node* node = insertItemAfter(list, "after-head", head);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, head->next);
+    munit_assert_ptr_equal(node->prev, head);
+    munit_assert_ptr_equal(node->next, oldNext);
+    munit_assert_ptr_equal(node, oldNext->prev);
+    munit_assert_int(list->length,==,6);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted after head");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting in middle...");
+    Node* middle = getItem(list, 3);
+    oldNext = middle->next;
+    node = insertItemAfter(list, "after-middle", middle);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, middle->next);
+    munit_assert_ptr_equal(node->prev, middle);
+    munit_assert_ptr_equal(node->next, oldNext);
+    munit_assert_ptr_equal(node, oldNext->prev);
+    munit_assert_int(list->length,==,7);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted after middle");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Inserting after tail...");
+    Node* oldTail = list->tail;
+    node = insertItemAfter(list, "caboose", oldTail);
+    munit_assert_not_null(node);
+    munit_assert_ptr_equal(node, oldTail->next);
+    munit_assert_ptr_equal(node->prev, oldTail);
+    munit_assert_int(list->length,==,8);
+    munit_log(MUNIT_LOG_INFO, "Successfully inserted after old tail");
+    printFullList(list);
+
     return MUNIT_OK;
 }
 
 int main(int argc, char* argv[]){
-
-    // munit only allows us to make params that are char* lists
-    // so we have to smash things together and use our setup function to break them apart
-    static char* lists[] = {
-        "", "int,main", "apple,0,true,{carrot},null,ls -l", NULL
-    };
-    static char* insertions[] = {
-        "","0","star**",";-"," ","banana","The only way out is through.\n-Anon",NULL
-    };
-    static MunitParameterEnum list_params[] = {
-        {"list", lists},
-        {"insertion",insertions},
-        { NULL, NULL},
-    };
-
 
     static MunitTest tests[] = {
     {
@@ -146,14 +240,30 @@ int main(int argc, char* argv[]){
         MUNIT_TEST_OPTION_NONE,
         NULL
     },
-/*     {
-        "/append",
-        appendTest,
-        appendSetup,
-        appendTeardown,
+    {
+        "/insert/at",
+        insertAtTest,
+        NULL,
+        NULL,
         MUNIT_TEST_OPTION_NONE,
-        list_params
-    }, */
+        NULL
+    },
+    {
+        "/insert/before",
+        insertBeforeTest,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
+    {
+        "/insert/after",
+        insertAfterTest,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
     /* Mark the end of the array with an entry where the test
     * function is NULL */
     { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }

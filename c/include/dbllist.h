@@ -24,8 +24,11 @@ void deleteList(List* list);
 
 Node* findItem(List* list, const char* data, int* pos);
 Node* getItem(List* list, int pos);
-Node* insertItem(List* list, const char* data, int pos);
+Node* insertItemAt(List* list, const char* data, int pos);
+Node* insertItemBefore(List* list, const char* data, Node* node);
+Node* insertItemAfter(List* list, const char* data, Node* node);
 Node* appendItem(List* list, const char* data);
 
 #endif
+
 

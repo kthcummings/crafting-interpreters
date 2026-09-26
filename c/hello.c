@@ -5,7 +5,7 @@ void HelloWorld(void){
     return;
 }
 
-int main() {
+int main(int argc, char* argv[]){
     HelloWorld();
     return(0);
 }

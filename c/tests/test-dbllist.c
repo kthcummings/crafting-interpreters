@@ -218,6 +218,52 @@ MunitResult insertAfterTest(const MunitParameter params[], void* fixture){
     munit_log(MUNIT_LOG_INFO, "Successfully inserted after old tail");
     printFullList(list);
 
+    deleteList(list);
+
+    return MUNIT_OK;
+}
+
+MunitResult removeTest(const MunitParameter params[], void* fixture){
+    List* list = createListWithSep("0,1,2,3,4",",");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Removing head...");
+    Node* head = list->head;
+    Node* newHead = head->next;
+    removeNode(list, &head);
+    munit_assert_null(head);
+    munit_assert_ptr_equal(newHead, list->head);
+    munit_assert_null(newHead->prev);
+    munit_assert_int(list->length,==,4);
+    munit_log(MUNIT_LOG_INFO, "Successfully removed head");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Removing tail...");
+    Node* tail = list->tail;
+    Node* newTail = tail->prev;
+    removeNode(list, &tail);
+    munit_assert_null(tail);
+    munit_assert_ptr_equal(newTail, list->tail);
+    munit_assert_null(newTail->next);
+    munit_assert_int(list->length,==,3);
+    munit_log(MUNIT_LOG_INFO, "Successfully removed tail");
+    printFullList(list);
+
+    munit_log(MUNIT_LOG_INFO, "Removing from middle...");
+    Node* middle = getItem(list,1);
+    Node* prev = middle->prev;
+    Node* next = middle->next;
+    removeNodeAt(list,1);
+    Node* newMiddle = getItem(list,1);
+    munit_assert_ptr_not_equal(middle, newMiddle);
+    munit_assert_ptr_equal(prev->next, next);
+    munit_assert_ptr_equal(prev, next->prev);
+    munit_assert_int(list->length,==,2);
+    munit_log(MUNIT_LOG_INFO, "Successfully removed from middle");
+    printFullList(list);
+
+    deleteList(list);
+
     return MUNIT_OK;
 }
 
@@ -259,6 +305,14 @@ int main(int argc, char* argv[]){
     {
         "/insert/after",
         insertAfterTest,
+        NULL,
+        NULL,
+        MUNIT_TEST_OPTION_NONE,
+        NULL
+    },
+    {
+        "/remove",
+        removeTest,
         NULL,
         NULL,
         MUNIT_TEST_OPTION_NONE,

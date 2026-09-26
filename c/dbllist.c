@@ -72,6 +72,7 @@ void deleteList(List* list){
         }
     }
     free(list);
+    list = NULL;
 }
 
 Node* getItem(List* list, int pos){
@@ -192,5 +193,41 @@ Node* appendItem(List* list, const char* data){
     list->tail = newNode;
     list->length++;
     return newNode;
+}
+
+// For speed's sake we will not check to see if the node is actually in the list
+// that is passed so there may be some strange behavior if it's not
+// but it's reasonable to assume the caller is responsible for checking this
+void removeNode(List* list, Node** node){
+    Node* prev = (*node)->prev;
+    Node* next = (*node)->next;
+    if(list->length == 1)
+    {
+        // only node in the list
+        list->head = NULL;
+        list->tail = NULL;
+    }
+    else if(*node == list->head){
+        next->prev = NULL;
+        list->head = next;
+    }
+    else if(*node == list->tail){
+        prev->next = NULL;
+        list->tail = prev;
+    }
+    else{
+        prev->next = next;
+        next->prev = prev;
+    }
+
+    free((*node)->data);
+    free(*node);
+    list->length--;
+    *node = NULL;
+}
+
+void removeNodeAt(List* list, int pos){
+    Node* node = getItem(list, pos);
+    removeNode(list, &node);
 }
 

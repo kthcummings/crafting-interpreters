@@ -29,6 +29,9 @@ Node* insertItemBefore(List* list, const char* data, Node* node);
 Node* insertItemAfter(List* list, const char* data, Node* node);
 Node* appendItem(List* list, const char* data);
 
+void removeNode(List* list, Node** node);
+void removeNodeAt(List* list, int pos);
+
 #endif
 
 

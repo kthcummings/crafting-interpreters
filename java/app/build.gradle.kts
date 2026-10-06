@@ -17,7 +17,9 @@ repositories {
 
 dependencies {
     // Use JUnit test framework.
-    testImplementation(libs.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
     // This dependency is used by the application.
     implementation(libs.guava)
@@ -30,7 +32,24 @@ java {
     }
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+
+    // Run with -Pverbose to also see System.out/System.err from tests.
+    val verbose = providers.gradleProperty("verbose").isPresent
+
+    testLogging {
+        // Print a line for each test as it finishes.
+        events("passed", "skipped", "failed")
+        // Show assertion messages and stack traces for failures.
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = verbose
+        showCauses = true
+        showStackTraces = true
+    }
+}
+
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass = "com.craftinginterpreters.lox"
 }

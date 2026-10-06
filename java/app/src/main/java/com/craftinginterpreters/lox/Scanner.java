@@ -83,19 +83,44 @@ public class Scanner {
                     while(peek() != '\n' && !isAtEnd()) advance();
                 } else if(match('*')){
                     // Block comment can contain newlines so we just look for the end
-                    while(true){
-                        if(peek() != '*' && !isAtEnd()){
+                    int nest = 0;
+                    int end = -1;
+                    while(!isAtEnd()){
+                        if(peek() == '\n'){
+                            line++;
+                            advance();
+                        }
+                        else if(peek() != '*' && peek() != '/'){
                             advance();
                         }
                         else if(peek() == '*' && peekNext() == '/'){
-                            // close out block comment
+                            // check to see if this is part of a nested comment
+                            if(nest == 0){
+                                current = current + 2;
+                                break;
+                            }
+                            else{
+                                nest--;
+                                current = current + 2;
+                                end = current;
+                            }
+                        }
+                        else if(peek() == '/' && peekNext() == '*') {
+                            // found the start of a nested block comment
+                            nest++;
                             current = current + 2;
-                            break;
                         }
-                        else {
-                            // we are at the end
-                            break;
-                        }
+                    }
+                    // if we end up here we have mismatched comments
+                    // meaning some of them are malformed and we probably ate
+                    // up all the tokens. so we rewind to the last comment end
+                    // and output a warning
+                    if(nest > 0){
+                        Lox.error(line, "Unmatched nested block comments found. Reverting to last end block sequence.");
+                        current = end;
+                    }
+                    else{
+                        Lox.error(line, "Block comment without end sequence.");
                     }
                 }
                 else {

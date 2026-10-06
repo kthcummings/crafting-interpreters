@@ -20,6 +20,11 @@ public class ScannerTest {
         LexSimple(source);
     }
 
+    @Test public void scannerCanLexSimpleNestedBlockComment() {
+        String source = "var /* /*block*/ comment */language = \"lox\";";
+        LexSimple(source);
+    }
+
     private void LexSimple(String source){
         Scanner scanner = new Scanner(source);
 

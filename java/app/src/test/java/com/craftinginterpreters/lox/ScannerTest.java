@@ -3,8 +3,8 @@
  */
 package com.craftinginterpreters.lox;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import static com.craftinginterpreters.lox.TokenType.*;
 
 import java.util.List;
@@ -12,9 +12,19 @@ import java.util.List;
 public class ScannerTest {
     @Test public void scannerCanLexSimple() {
         String source = "var language = \"lox\";";
+        LexSimple(source);
+    }
+
+    @Test public void scannerCanLexBlockComment(){
+        String source = "var /*block comment*/language = \"lox\";";
+        LexSimple(source);
+    }
+
+    private void LexSimple(String source){
         Scanner scanner = new Scanner(source);
 
         List<Token> tokens = scanner.scanTokens();
+        tokens.forEach(token ->System.out.println(token.toString()));
         assertEquals(6, tokens.size());
         
         Token keywordVar = tokens.get(0);

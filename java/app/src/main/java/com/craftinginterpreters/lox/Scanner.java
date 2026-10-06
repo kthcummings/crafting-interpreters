@@ -81,7 +81,24 @@ public class Scanner {
                 if(match('/')) {
                     // A comment goes until the end of the line
                     while(peek() != '\n' && !isAtEnd()) advance();
-                } else {
+                } else if(match('*')){
+                    // Block comment can contain newlines so we just look for the end
+                    while(true){
+                        if(peek() != '*' && !isAtEnd()){
+                            advance();
+                        }
+                        else if(peek() == '*' && peekNext() == '/'){
+                            // close out block comment
+                            current = current + 2;
+                            break;
+                        }
+                        else {
+                            // we are at the end
+                            break;
+                        }
+                    }
+                }
+                else {
                     addToken(SLASH);
                 }
                 break;

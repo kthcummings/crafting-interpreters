@@ -49,6 +49,28 @@ tasks.withType<Test> {
     }
 }
 
+sourceSets {
+    create("tool")   // src/tool/java, compiled by :app:compileToolJava
+}
+
+val astOutputDir = layout.projectDirectory.dir("src/main/java/com/craftinginterpreters/lox")
+
+val cleanGeneratedAst = tasks.register<Delete>("cleanGeneratedAst") {
+    description = "Deletes the generated Expr.java."
+    delete(astOutputDir.file("Expr.java"))
+}
+
+tasks.register<JavaExec>("generateAst") {
+    group = "build"
+    description = "Generates the Expr AST classes into the lox package."
+
+    dependsOn(cleanGeneratedAst)
+
+    classpath = sourceSets["tool"].runtimeClasspath
+    mainClass = "com.craftinginterpreters.tool.GenerateAst"
+    args(astOutputDir.asFile.path)
+}
+
 application {
     // Define the main class for the application.
     mainClass = "com.craftinginterpreters.lox"

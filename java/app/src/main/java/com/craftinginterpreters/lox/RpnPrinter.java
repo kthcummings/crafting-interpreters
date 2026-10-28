@@ -47,6 +47,12 @@ public class RpnPrinter implements Expr.Visitor<String>{
         return printStack(stack);
     }
 
+    @Override
+    public String visitTernaryExpr(Expr.Ternary expr) {
+        // not implementing this
+        return " ";
+    }
+
     private String printStack(Deque<String> stack) {
         String output = stack.toString();
         output = output.replaceAll(",", "");

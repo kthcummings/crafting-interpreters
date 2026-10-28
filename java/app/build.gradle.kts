@@ -32,6 +32,10 @@ java {
     }
 }
 
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 
@@ -73,5 +77,5 @@ tasks.register<JavaExec>("generateAst") {
 
 application {
     // Define the main class for the application.
-    mainClass = "com.craftinginterpreters.lox"
+    mainClass = "com.craftinginterpreters.lox.Lox"
 }

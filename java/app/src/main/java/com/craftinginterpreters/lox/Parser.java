@@ -107,6 +107,7 @@ public class Parser {
         return primary();
     }
 
+    @SuppressWarnings("incomplete-switch")
     private Expr primary() {
         if(match(FALSE)) return new Expr.Literal(false);
         if(match(TRUE)) return new Expr.Literal(true);
@@ -120,6 +121,23 @@ public class Parser {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        switch(peek().type){
+            case COMMA:
+            case BANG_EQUAL:
+            case EQUAL_EQUAL:
+            case GREATER:
+            case GREATER_EQUAL:
+            case LESS:
+            case LESS_EQUAL:
+            case MINUS:
+            case PLUS:
+            case SLASH:
+            case STAR:
+                Token operator = advance();
+                expression();
+                throw error(operator, "Missing left operand.");
         }
 
         throw error(peek(), "Expect expression.");
